@@ -1,0 +1,118 @@
+TEMPLATE — APROVAÇÃO / REPROVAÇÃO PÓS-FASE
+IDENTIFICAÇÃO
+
+Projeto: Finance App (PRD v1.0 – imutável)
+
+Fase avaliada: FASE {NÚMERO_DA_FASE}
+
+Data da avaliação: {dd/mm/aaaa}
+
+1️⃣ VERIFICAÇÃO DE ESCOPO (OBRIGATÓRIA)
+
+Marque SIM ou NÃO:
+
+ O código implementa somente os itens da FASE {NÚMERO_DA_FASE}?
+
+ Nenhuma funcionalidade de fase futura foi implementada?
+
+ Não há simplificações silenciosas de regras do PRD?
+
+ O código é executável e testável isoladamente?
+
+👉 Se qualquer resposta for NÃO, a fase é REPROVADA automaticamente.
+
+2️⃣ CONFORMIDADE COM O PRD
+
+Confirme item a item:
+
+ Regras financeiras da fase estão corretas
+
+ Datas e valores seguem padrões (dd/mm/aaaa, centavos)
+
+ Pendências / negativos tratados conforme PRD
+
+ Não há lógica implícita não documentada
+
+Observações (se houver):
+
+{comentários objetivos}
+
+3️⃣ QUALIDADE TÉCNICA
+
+Avalie:
+
+ Código legível e organizado
+
+ Funções com responsabilidade clara
+
+ Ausência de duplicações graves
+
+ Sem “atalhos perigosos” (hardcode indevido, gambiarras)
+
+Observações:
+
+{comentários técnicos}
+
+4️⃣ CHECKPOINT DA LLM (VALIDAÇÃO CRUZADA)
+
+Confirme se a LLM entregou corretamente:
+
+ Lista de regras do PRD atendidas
+
+ Lista de regras não implementadas (fases futuras)
+
+ Lista de riscos técnicos (ou “nenhum”)
+
+ Declaração explícita: “Aguardando autorização para a próxima fase”
+
+👉 Se faltar qualquer item, a fase é REPROVADA.
+
+5️⃣ DECISÃO FINAL
+
+Selecione apenas uma opção:
+
+⬜ APROVADA
+
+A fase atende integralmente o PRD
+
+Autorizo executar a próxima fase
+
+Autorização explícita:
+
+Execute a FASE {NÚMERO_DA_FASE + 1} seguindo o Prompt Padrão de Execução.
+
+⬜ REPROVADA
+
+Motivo objetivo (obrigatório):
+
+{descrever falha específica, sem generalidades}
+
+
+Correções exigidas:
+
+1) Correção X
+2) Correção Y
+3) Correção Z
+
+
+Instrução obrigatória à LLM:
+
+Corrija exclusivamente os pontos acima, sem alterar outras partes, e reapresente a FASE {NÚMERO_DA_FASE}.
+
+🛑 REGRA DE OURO
+
+Sem aprovação explícita, não há próxima fase.
+
+Retrabalho não autoriza avanço.
+
+Nova fase nunca começa na mesma resposta que uma correção.
+
+💡 DICA OPERACIONAL (opcional, mas poderosa)
+
+Após reprovação, você pode acrescentar:
+
+Antes de corrigir, explique em até 5 linhas por que a falha ocorreu,
+para evitar repetição nas próximas fases.
+
+
+Isso treina a LLM durante o projeto, reduzindo erros cumulativos.
