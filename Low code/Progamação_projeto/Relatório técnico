@@ -1,0 +1,95 @@
+================================================================================
+RELATÓRIO TÉCNICO AVANÇADO: ESTRATÉGIA DE BLINDAGEM E EVOLUÇÃO
+================================================================================
+
+Este documento refina o diagnóstico inicial e estabelece um protocolo rígido 
+de segurança (Guard-Rails) para a evolução do sistema financeiro.
+
+--------------------------------------------------------------------------------
+1. DIAGNÓSTICO DE RISCO E ARQUITETURA ATUAL
+--------------------------------------------------------------------------------
+
+* MONOLITO FRÁGIL: O `index.html` concentra ~2400 linhas. A complexidade ciclomática 
+  é alta, tornando qualquer pequena alteração um risco de quebra em cascata.
+
+* ESTADO MUTÁVEL (RISCO CRÍTICO): Dados globais são alterados diretamente por 
+  várias funções. Se uma função calcular errado o saldo, não há como rastrear 
+  a origem do erro.
+
+* REDUNDÂNCIA SILENCIOSA: Regras de negócio (ex: o que define uma despesa fixa) 
+  estão duplicadas em event listeners e funções auxiliares. Mudar em um lugar 
+  e esquecer outro cria bugs de inconsistência de dados.
+
+--------------------------------------------------------------------------------
+2. GUARD-RAILS (BARREIRAS DE SEGURANÇA OBRIGATÓRIAS)
+--------------------------------------------------------------------------------
+Estas regras devem ser seguidas rigosamente antes de qualquer nova feature:
+
+[!] GUARD-RAIL 1: "DATA INTEGRITY FIRST"
+    Nenhuma transação entra no banco sem validação de schema.
+    - Antes: `saveTransaction({ amount: 10 })` (Pode salvar dados incompletos)
+    - Depois: `TransactionSchema.validate(data)` deve rodar antes do save. 
+    Se falhar, o app deve rejeitar a operação e logar o erro.
+
+[!] GUARD-RAIL 2: "READ-ONLY CALCULATIONS"
+    Funções de cálculo (saldos, faturas) JAMAIS devem alterar o objeto original.
+    - Regra: Receba dados -> Clone -> Calcule -> Retorne novo valor.
+    - Proibido: `transacao.valor = transacao.valor * -1` (Altera o original)
+
+[!] GUARD-RAIL 3: "UI STATE DECOUPLING"
+    A interface não deve ser a "fonte da verdade". 
+    - Errado: Ler o valor de um `<div>` para saber o saldo atual.
+    - Correto: Ler o saldo da variável de estado e apenas "pintar" o `<div>`.
+
+[!] GUARD-RAIL 4: "SAFE DOM MANIPULATION"
+    Nunca use IDs gerados dinamicamente para lógica crítica sem validação.
+    Use `data-attributes` (ex: `data-transaction-id="123"`) para vincular 
+    elementos da tela aos dados.
+
+--------------------------------------------------------------------------------
+3. DICAS DE OURO (GOLDEN TIPS) - CAMADA DE EXCELÊNCIA
+--------------------------------------------------------------------------------
+
+★ DICA 1: PADRÃO "SHADOW MODULE"
+  Ao invés de reescrever tudo, crie um objeto global `FinanceCore` no topo do 
+  script. Comece a mover funções puras (cálculos, formatação) para dentro dele.
+  O código antigo chama `FinanceCore.formatCurrency(val)` ao invés da função solta.
+
+★ DICA 2: INTL.NUMBERFORMAT É SEU MELHOR AMIGO
+  Abandone regex manuais para formatar dinheiro. O `Intl.NumberFormat` do 
+  JavaScript é otimizado, não quebra com moedas diferentes e lida com arredondamento 
+  melhor que qualquer solução caseira.
+
+★ DICA 3: VIRTUALIZAÇÃO DE LISTA (FUTURO)
+  Quando passar de 2.000 transações, renderizar todas na tela vai travar o browser.
+  Implemente "Infinite Scroll" ou paginação virtual (renderizar apenas o que 
+  está visível na tela) para manter a performance em 60fps.
+
+★ DICA 4: BACKUP AUTOMÁTICO EM JSON
+  Antes de qualquer migração crítica de estrutura de dados (ex: mudar nome de campo),
+  crie um script que exporta todo o IndexedDB para um JSON e baixa para o usuário.
+  Segurança em primeiro lugar.
+
+--------------------------------------------------------------------------------
+4. RECOMENDAÇÕES E PRÓXIMOS PASSOS (ACTION PLAN)
+--------------------------------------------------------------------------------
+
+FASE 1: SANEAMENTO (SEM MUDANÇA VISUAL)
+  - [ ] Implementar o `FinanceCore` (objeto namespace).
+  - [ ] Centralizar todas as chamadas de `localStorage` e `IndexedDB` em um 
+        único serviço de dados. Blindar com `try/catch`.
+
+FASE 2: REGRAS DE NEGÓCIO
+  - [ ] Isolar a lógica de "Parcelamento" em uma classe pura.
+  - [ ] Criar testes manuais: Um roteiro de 5 passos que deve ser testado 
+        antes de cada commit (ex: Adicionar Receita -> Editar -> Excluir).
+
+FASE 3: UI REATIVA
+  - [ ] Separar a lógica de "Renderizar Gráfico" da lógica de "Calcular Gráfico".
+        Isso permite atualizar o gráfico sem piscar a tela inteira.
+
+================================================================================
+CONCLUSÃO: O código atual funciona, mas opera no limite da manutenibilidade. 
+A adoção dos Guard-Rails acima transformará o projeto de "Amador" para "Profissional"
+sem a necessidade de reescrever do zero (Big Bang Rewrite).
+================================================================================
